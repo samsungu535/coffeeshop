@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface CoffeeService {
 
-  Coffee getCoffeeById(Long id);
+    Coffee getCoffeeById(Long id);
 
-  List<Coffee> listCoffee();
+    List<Coffee> listCoffee();
 }

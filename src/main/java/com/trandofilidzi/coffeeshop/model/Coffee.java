@@ -1,7 +1,13 @@
 package com.trandofilidzi.coffeeshop.model;
 
-import javax.persistence.*;
-import java.math.BigDecimal;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "t_coffee")
@@ -11,15 +17,7 @@ public class Coffee {
     private String coffeeName;
     private int coffeeArabica;
     private Order order;
-    private BigDecimal coffeePricePerGram;
-
-    public Coffee() {
-    }
-
-    public Coffee(String coffeeName, int coffeeArabica) {
-        this.coffeeName = coffeeName;
-        this.coffeeArabica = coffeeArabica;
-    }
+    private double coffeePricePerGram;
 
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
@@ -60,17 +58,17 @@ public class Coffee {
         this.coffeeArabica = coffeeArabica;
     }
 
-    public BigDecimal getCoffeePricePerGram() {
+    public double getCoffeePricePerGram() {
         return coffeePricePerGram;
     }
 
     @Column(name = "coffee_price_per_gram", nullable = false)
-    public void setCoffeePricePerGram(BigDecimal coffeePricePerGram) {
+    public void setCoffeePricePerGram(double coffeePricePerGram) {
         this.coffeePricePerGram = coffeePricePerGram;
     }
 
     @Override
     public String toString() {
-        return coffeeName + " arabica:" + coffeeArabica + "%";
+        return coffeeName + ", arabica:" + coffeeArabica + "%, " + "price per gram: " + "$" + coffeePricePerGram;
     }
 }

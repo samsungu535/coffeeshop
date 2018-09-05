@@ -30,18 +30,21 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public void updateOrder(Order order) {
         orderRepository.updateOrder(order);
+        LOGGER.info("Order updated");
     }
 
     @Override
     @Transactional
     public void deleteOrder(long orderId) {
         orderRepository.deleteOrder(orderId);
+        LOGGER.info("Order deleted");
     }
 
     @Override
     @Transactional
     public Order getOrderById(long orderId) {
         Order order = orderRepository.getOrderById(orderId);
+        LOGGER.info("Order received");
         return order;
     }
 
@@ -49,6 +52,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public List<Order> listOrders() {
         List<Order> orderList = orderRepository.listOrders();
+        LOGGER.info("Orders received");
         return orderList;
     }
 }
