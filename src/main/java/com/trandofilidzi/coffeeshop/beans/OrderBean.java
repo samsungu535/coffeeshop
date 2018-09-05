@@ -28,6 +28,7 @@ public class OrderBean implements Serializable {
     private OrderService orderService;
     @Autowired
     private OrderProperties orderProperties;
+    private Order order;
     private List<Order> orderList = new ArrayList<>();
     private String quantity;
     private SubOrder subOrder;
@@ -44,6 +45,14 @@ public class OrderBean implements Serializable {
     @PostConstruct
     public void init() {
         delivery = orderProperties.getPickupDelivery();
+    }
+
+    public Order getOrder() {
+        return order;
+    }
+
+    public void setOrder(Order order) {
+        this.order = order;
     }
 
     public List<Order> getOrderList() {
@@ -139,7 +148,8 @@ public class OrderBean implements Serializable {
     }
 
     public void addToBucket() {
-        int subOrderTotalPrice = new Double(Integer.parseInt(quantity) * coffee.getCoffeePricePerGram()).intValue();
+        int coffeeQuantity = Integer.parseInt(quantity);
+        int subOrderTotalPrice = new Double(coffeeQuantity * coffee.getCoffeePricePerGram()).intValue();
         SubOrder subOrder = new SubOrder(atomicInteger.incrementAndGet(), coffee, Integer.parseInt(quantity), subOrderTotalPrice);
         subOrderList.add(subOrder);
         orderTotalPrice = orderTotalPrice + subOrderTotalPrice;

@@ -9,6 +9,7 @@
 <h:head>
     <title>PrimeFaces Hello World Example</title>
 </h:head>
+
 <h:body>
     <h:form>
         <h:panelGrid columns="6" cellpadding="5">
@@ -20,6 +21,7 @@
             </p:selectOneMenu>
             <p:inputText id="minimalQuantit" value="#{orderBean.quantity}">
                 <f:validateRegex pattern="[0-9]*"/>
+                <f:validateLongRange minimum="100" maximum="10000" />
             </p:inputText>
             <p:commandButton value="add" update="total" actionListener="#{orderBean.addToBucket()}"
                              icon="ui-icon-check"/>
