@@ -20,38 +20,33 @@ public class OrderServiceImpl implements OrderService {
     private OrderRepository orderRepository;
 
     @Override
-    @Transactional
     public void createOrder(Order order) {
-        orderRepository.createOrder(order);
+        orderRepository.save(order);
         LOGGER.info("Order created");
     }
 
     @Override
-    @Transactional
     public void updateOrder(Order order) {
-        orderRepository.updateOrder(order);
+        orderRepository.save(order);
         LOGGER.info("Order updated");
     }
 
     @Override
-    @Transactional
     public void deleteOrder(long orderId) {
-        orderRepository.deleteOrder(orderId);
+        orderRepository.deleteById(orderId);
         LOGGER.info("Order deleted");
     }
 
     @Override
-    @Transactional
     public Order getOrderById(long orderId) {
-        Order order = orderRepository.getOrderById(orderId);
+        Order order = orderRepository.getOne(orderId);
         LOGGER.info("Order received");
         return order;
     }
 
     @Override
-    @Transactional
     public List<Order> listOrders() {
-        List<Order> orderList = orderRepository.listOrders();
+        List<Order> orderList = orderRepository.findAll();
         LOGGER.info("Orders received");
         return orderList;
     }
