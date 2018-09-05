@@ -11,29 +11,40 @@
 </h:head>
 <h:body>
     <h:form order_id="form">
+
+
+        <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+            <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+            <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+        </p:confirmDialog>
         <p:layout style="min-width:400px;min-height:600px;">
             <p:layoutUnit position="west" resizable="true" size="200">
-                <p:commandButton value="Create new order"/>
+                <p:commandButton action="#{orderBean.createNewOrder()}" value="Create new order"/>
             </p:layoutUnit>
             <p:layoutUnit position="center">
-                <p:dataTable var="order" value="#{orderBean.orderList}">
+                <p:dataTable id="orderTable" var="order" value="#{orderBean.orderList}">
                     <p:column headerText="order_id">
-                        <h:outputText value="#{order.order_id}"/>
+                        <h:outputText value="#{order.orderId}"/>
                     </p:column>
-                    <p:column headerText="TotalPrice">
+                    <p:column headerText="Coffee list">
+                        <h:outputText value="#{order.coffeeList}"/>
+                    </p:column>
+                    <p:column headerText="Total price">
                         <h:outputText value="#{order.orderTotalPrice}"/>
                     </p:column>
-                    <p:column headerText="order_is_deliver">
+                    <p:column headerText="Delivery">
                         <h:outputText value="#{order.deliver}"/>
                     </p:column>
-                    <p:column headerText="order_deliver_date_from">
+                    <p:column headerText="Delivery date, from">
                         <h:outputText value="#{order.deliverDateFrom}"/>
                     </p:column>
-                    <p:column headerText="order_deliver_date_to">
+                    <p:column headerText="Deliver date, to">
                         <h:outputText value="#{order.deliverDateTo}"/>
                     </p:column>
-                    <p:column headerText="order_total_price">
-                        <h:outputText value="#{order.orderTotalPrice}"/>
+                    <p:column headerText="Delete Order">
+                        <p:commandButton update="orderTable" value="Delete order" actionListener="#{orderBean.deleteOrder(order.orderId)}">
+                            <p:confirm header="Confirmation" message="Are you sure?" icon="ui-icon-alert" />
+                        </p:commandButton>
                     </p:column>
                 </p:dataTable>
             </p:layoutUnit>

@@ -28,11 +28,11 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id", nullable = false)
-    public long getOrder_id() {
+    public long getOrderId() {
         return order_id;
     }
 
-    public void setOrder_id(long order_id) {
+    public void setOrderId(long order_id) {
         this.order_id = order_id;
     }
 

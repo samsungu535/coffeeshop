@@ -5,6 +5,7 @@ import com.trandofilidzi.coffeeshop.model.Order;
 import com.trandofilidzi.coffeeshop.model.notentitymodel.SubOrder;
 import com.trandofilidzi.coffeeshop.properties.OrderProperties;
 import com.trandofilidzi.coffeeshop.service.OrderService;
+import com.trandofilidzi.coffeeshop.utils.RedirectUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -186,21 +187,35 @@ public class OrderBean implements Serializable {
     }
 
     public void createOrder() {
-        Order order = new Order();
-        if (delivery.equals(orderProperties.getByCourierDelivery())) {
-            order.setDeliver(true);
-            order.setDeliverDateFrom(dateFrom);
-            order.setDeliverDateTo(dateTo);
-        } else if (delivery.equals(orderProperties.getPickupDelivery())) {
-            order.setDeliver(false);
+        if (!subOrderList.isEmpty()) {
+            Order order = new Order();
+            if (delivery.equals(orderProperties.getByCourierDelivery())) {
+                order.setDeliver(true);
+                order.setDeliverDateFrom(dateFrom);
+                order.setDeliverDateTo(dateTo);
+            } else if (delivery.equals(orderProperties.getPickupDelivery())) {
+                order.setDeliver(false);
+            }
+            List<Coffee> coffeeList = new ArrayList<>();
+            for (SubOrder subOrder : subOrderList) {
+                coffeeList.add(subOrder.getCoffee());
+            }
+            order.setCoffeeList(coffeeList);
+            order.setOrderTotalPrice(orderTotalPrice);
+            orderService.createOrder(order);
+            RedirectUtil.redirectToHomePage();
+            LOGGER.info("Order created");
+            return;
         }
-        List<Coffee> coffeeList = new ArrayList<>();
-        for (SubOrder subOrder : subOrderList) {
-            coffeeList.add(subOrder.getCoffee());
-        }
-        order.setCoffeeList(coffeeList);
-        order.setOrderTotalPrice(orderTotalPrice);
-        orderService.createOrder(order);
-        LOGGER.info("Order created");
+        LOGGER.info("SubOrder list is empty");
+    }
+
+    public void deleteOrder(long orderId) {
+        orderService.deleteOrder(orderId);
+        LOGGER.info("SubOrder with id: {} deleted" + orderId);
+    }
+
+    public void createNewOrder() {
+        RedirectUtil.redirectEditCreateOrderPage();
     }
 }
