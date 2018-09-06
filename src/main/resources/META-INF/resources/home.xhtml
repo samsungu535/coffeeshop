@@ -4,6 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
 >
 
 <h:head>
@@ -44,7 +45,7 @@
                     </p:column>
                     <p:column headerText="Edit order">
                         <p:commandButton action="#{orderBean.editOrder}" value="Edit order">
-
+                            <f:param name="orderId" value="#{order.orderId}"/>
                         </p:commandButton>
                     </p:column>
                     <p:column headerText="Delete order">

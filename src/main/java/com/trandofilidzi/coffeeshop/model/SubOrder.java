@@ -10,14 +10,15 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 import java.math.BigDecimal;
 
 @Entity(name = "t_sub_order")
 public class SubOrder {
 
     private long subOrderId;
-    volatile private long internalSubOrderId;
-    volatile private String coffeeToString;
+    private long internalSubOrderId;
+    private String coffeeToString;
     private Coffee coffee;
     private int subOrderCoffeeQuantity;
     private BigDecimal subOrderTotalPrice;
@@ -26,8 +27,9 @@ public class SubOrder {
     public SubOrder() {
     }
 
-    public SubOrder(long internalSubOrderId, Coffee coffee, int subOrderCoffeeQuantity, BigDecimal subOrderTotalPrice) {
+    public SubOrder(long internalSubOrderId, String coffeeToString, Coffee coffee, int subOrderCoffeeQuantity, BigDecimal subOrderTotalPrice) {
         this.internalSubOrderId = internalSubOrderId;
+        this.coffeeToString = coffeeToString;
         this.coffee = coffee;
         this.subOrderCoffeeQuantity = subOrderCoffeeQuantity;
         this.subOrderTotalPrice = subOrderTotalPrice;
@@ -43,7 +45,8 @@ public class SubOrder {
         this.order = order;
     }
 
-    @OneToOne(mappedBy = "subOrder")
+    @OneToOne
+    @JoinColumn(name = "sub_order_coffee_id")
     public Coffee getCoffee() {
         return coffee;
     }
@@ -81,6 +84,7 @@ public class SubOrder {
         this.subOrderCoffeeQuantity = subOrderCoffeeQuantity;
     }
 
+    @Transient
     public long getInternalSubOrderId() {
         return internalSubOrderId;
     }
@@ -89,8 +93,9 @@ public class SubOrder {
         this.internalSubOrderId = internalSubOrderId;
     }
 
+    @Column(name = "sub_order_coffee_to_string", nullable = false)
     public String getCoffeeToString() {
-        return coffee.toString();
+        return coffeeToString;
     }
 
     public void setCoffeeToString(String coffeeToString) {
@@ -102,16 +107,14 @@ public class SubOrder {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SubOrder subOrder = (SubOrder) o;
-        return subOrderId == subOrder.subOrderId &&
-                subOrderCoffeeQuantity == subOrder.subOrderCoffeeQuantity &&
+        return subOrderCoffeeQuantity == subOrder.subOrderCoffeeQuantity &&
                 Objects.equal(coffee, subOrder.coffee) &&
-                Objects.equal(subOrderTotalPrice, subOrder.subOrderTotalPrice) &&
-                Objects.equal(order, subOrder.order);
+                Objects.equal(subOrderTotalPrice, subOrder.subOrderTotalPrice);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(subOrderId, coffee, subOrderCoffeeQuantity, subOrderTotalPrice, order);
+        return Objects.hashCode(coffee, subOrderCoffeeQuantity, subOrderTotalPrice);
     }
 
     @Override

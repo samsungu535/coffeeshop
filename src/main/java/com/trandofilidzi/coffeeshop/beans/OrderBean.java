@@ -22,11 +22,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Named
 public class OrderBean implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderBean.class);
+    private AtomicInteger atomicInteger = new AtomicInteger(0);
     @Autowired
     private OrderService orderService;
     @Autowired
@@ -44,6 +46,7 @@ public class OrderBean implements Serializable {
     private Date dateTo;
     private Date maxDateTo;
     private Date minDateTo;
+    private boolean isOrderIdIsNull;
 
     @PostConstruct
     public void init() {
@@ -122,6 +125,21 @@ public class OrderBean implements Serializable {
         this.dateTo = dateTo;
     }
 
+    public boolean isOrderIdIsNull() {
+        if (order != null) {
+            if (order.getOrderId() > 0) {
+                return isOrderIdIsNull = false;
+            } else {
+                return isOrderIdIsNull = true;
+            }
+        }
+        return isOrderIdIsNull = true;
+    }
+
+    public void setOrderIdIsNull(boolean orderIdIsNull) {
+        isOrderIdIsNull = orderIdIsNull;
+    }
+
     public void onDateSelect() {
         minDateTo = new Date(dateFrom.getTime() + orderProperties.getOneHour() * orderProperties.getTimeToOrderProcessing());
         maxDateTo = new Date(minDateTo.getTime() + orderProperties.getOneHour() * orderProperties.getTimeToDelivery());
@@ -141,17 +159,11 @@ public class OrderBean implements Serializable {
         List<SubOrder> subOrderList = subOrderBean.getSubOrderList();
         if (!subOrderList.isEmpty()) {
             Order order = new Order();
-            if (delivery.equals(orderProperties.getByCourierDelivery())) {
-                order.setDeliver(true);
-                order.setDeliverDateFrom(dateFrom);
-                order.setDeliverDateTo(dateTo);
-            } else if (delivery.equals(orderProperties.getPickupDelivery())) {
-                order.setDeliver(false);
-            }
+            checkDelivery(order);
             order.setSubOrderList(subOrderBean.getSubOrderList());
             order.setOrderTotalPrice(orderTotalPrice);
             Order savedOrder = orderService.createOrder(order);
-            for (SubOrder subOrder: subOrderList){
+            for (SubOrder subOrder : subOrderList) {
                 subOrder.setOrder(savedOrder);
             }
             subOrderService.saveAllSubOrders(subOrderList);
@@ -166,17 +178,58 @@ public class OrderBean implements Serializable {
         }
     }
 
-    public void editOrder() {
+    public void updateOrder() {
+        List<SubOrder> subOrderList = subOrderBean.getSubOrderList();
+        if (!subOrderList.isEmpty()) {
+            checkDelivery(order);
+            order.setSubOrderList(subOrderBean.getSubOrderList());
+            order.setOrderTotalPrice(orderTotalPrice);
+            Order savedOrder = orderService.createOrder(order);
+            for (SubOrder subOrder : subOrderList) {
+                subOrder.setOrder(savedOrder);
+            }
+            orderService.createOrder(order);
+            subOrderService.saveAllSubOrders(subOrderList);
+            clearFormAfterOrderCreated();
+            RedirectUtil.redirectToHomePage();
+            LOGGER.info("Order created");
+            return;
+        } else {
+            LOGGER.info("SubOrder list is empty");
+            FacesContext facesContext = FacesContext.getCurrentInstance();
+            facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, "Bucket is empty", "Please choose any more coffee"));
+        }
+    }
+
+    public void checkDelivery(Order order) {
+        if (delivery.equals(orderProperties.getByCourierDelivery())) {
+            order.setDeliver(true);
+            order.setDeliverDateFrom(dateFrom);
+            order.setDeliverDateTo(dateTo);
+        } else if (delivery.equals(orderProperties.getPickupDelivery())) {
+            order.setDeliver(false);
+        }
+    }
+
+    public String editOrder() {
         FacesContext fc = FacesContext.getCurrentInstance();
         Map<String, String> params = fc.getExternalContext().getRequestParameterMap();
-        for (Order ord : orderList) {
-            if (ord.getOrderId() == Long.parseLong(params.get("orderId"))) {
-                order = ord;
-            }
+        order = orderService.getOrderById(Long.parseLong(params.get("orderId")));
+        List<SubOrder> subOrderList = subOrderService.findAllByOrderOrderId(order.getOrderId());
+        subOrderBean.setSubOrderList(subOrderList);
+        for (SubOrder subOrder : subOrderList) {
+            subOrder.setCoffeeToString(subOrder.getCoffee().toString());
+            subOrder.setInternalSubOrderId(atomicInteger.incrementAndGet());
         }
-//        List<Coffee> coffeeList = order.getCoffeeList();
-//        for (Coffee coffe: coffeeList){
-//            subOrderList.add(new SubOrder(atomicInteger.incrementAndGet(), coffee, Integer.parseInt(quantity), subOrderTotalPrice));
+        if (order.isDeliver()) {
+            setDelivery(orderProperties.getByCourierDelivery());
+        } else {
+            setDelivery(orderProperties.getPickupDelivery());
+        }
+        setDateFrom(order.getDeliverDateFrom());
+        setDateTo(order.getDeliverDateTo());
+        setOrderTotalPrice(order.getOrderTotalPrice());
+        return "editCreateOrder";
     }
 
     public void deleteOrder(String orderId) {
@@ -191,6 +244,7 @@ public class OrderBean implements Serializable {
     }
 
     public void clearFormAfterOrderCreated() {
+        order = null;
         delivery = orderProperties.getPickupDelivery();
         dateFrom = null;
         dateTo = null;

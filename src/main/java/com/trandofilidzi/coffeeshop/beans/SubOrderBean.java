@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class SubOrderBean implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SubOrderBean.class);
-    private static AtomicInteger atomicInteger = new AtomicInteger(0);
+    private AtomicInteger atomicInteger = new AtomicInteger(0);
     @Autowired
     private OrderProperties orderProperties;
 
@@ -64,7 +64,7 @@ public class SubOrderBean implements Serializable {
             if (coffeeQuantity.compareTo(orderProperties.getMinCoffeeQuantity()) == 1 ||
                     coffeeQuantity.compareTo(orderProperties.getMinCoffeeQuantity()) == 0) {
                 BigDecimal subOrderTotalPrice = coffee.getCoffeePricePerGram().multiply(coffeeQuantity);
-                SubOrder subOrder = new SubOrder(atomicInteger.incrementAndGet(), coffee, Integer.parseInt(quantity), subOrderTotalPrice);
+                SubOrder subOrder = new SubOrder(atomicInteger.incrementAndGet(), coffee.toString(), coffee, Integer.parseInt(quantity), subOrderTotalPrice);
                 orderBean.setOrderTotalPrice(orderBean.getOrderTotalPrice().add(subOrderTotalPrice));
                 subOrderList.add(subOrder);
                 clearFormAfterSuborderCreated();
@@ -93,7 +93,9 @@ public class SubOrderBean implements Serializable {
         Iterator<SubOrder> iterator = subOrderList.iterator();
         while (iterator.hasNext()) {
             SubOrder subOrder = iterator.next();
-            if (subOrder.getSubOrderId() == Integer.parseInt(internalSubOrderId)) {
+            long id = subOrder.getInternalSubOrderId();
+            long incomeId = Integer.parseInt(internalSubOrderId);
+            if (id == incomeId) {
                 orderBean.setOrderTotalPrice(orderBean.getOrderTotalPrice().subtract(subOrder.getSubOrderTotalPrice()));
                 iterator.remove();
                 LOGGER.info("SubOrder {} deleted from bucket", subOrder);

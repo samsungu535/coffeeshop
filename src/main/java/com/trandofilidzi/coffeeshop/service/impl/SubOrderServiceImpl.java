@@ -19,8 +19,16 @@ public class SubOrderServiceImpl implements SubOrderService {
     private SubOrderRepository subOrderRepository;
 
     @Override
-    public void saveAllSubOrders(List<SubOrder> subOrderList) {
-        subOrderRepository.saveAll(subOrderList);
-        LOGGER.info("Sub order saved");
+    public List<SubOrder> saveAllSubOrders(List<SubOrder> subOrderList) {
+        List<SubOrder> savedSubOrderList = subOrderRepository.saveAll(subOrderList);
+        LOGGER.info("Sub order saved {}", savedSubOrderList);
+        return savedSubOrderList;
+    }
+
+    @Override
+    public List<SubOrder> findAllByOrderOrderId(long orderId) {
+        List<SubOrder> subOrderList = subOrderRepository.findAllByOrderOrderId(orderId);
+        LOGGER.info("Sub order loaded {}", subOrderList);
+        return subOrderList;
     }
 }

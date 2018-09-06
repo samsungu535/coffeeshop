@@ -8,6 +8,3 @@ Coffee Shop
     * localhost:5000/home.xhtml  
     * localhost:5000/editCreateOrder.xhtml
     
-***
- !!implementation "Edit order" function - in progress
- --

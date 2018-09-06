@@ -5,7 +5,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.math.BigDecimal;
@@ -20,8 +19,7 @@ public class Coffee {
     private BigDecimal coffeePricePerGram;
     private SubOrder subOrder;
 
-    @OneToOne
-    @JoinColumn(name = "sub_order_coffee_id")
+    @OneToOne(mappedBy = "coffee")
     public SubOrder getSubOrder() {
         return subOrder;
     }
