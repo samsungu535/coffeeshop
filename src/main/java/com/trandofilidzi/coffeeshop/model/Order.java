@@ -7,6 +7,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -19,7 +20,7 @@ public class Order {
     private boolean isDeliver;
     private Date deliverDateFrom;
     private Date deliverDateTo;
-    private int orderTotalPrice;
+    private BigDecimal orderTotalPrice;
     private List<Coffee> coffeeList = new ArrayList<>();
 
     @OneToMany(mappedBy = "order", orphanRemoval = true)
@@ -70,11 +71,11 @@ public class Order {
     }
 
     @Column(name = "order_total_price", nullable = false)
-    public int getOrderTotalPrice() {
+    public BigDecimal getOrderTotalPrice() {
         return orderTotalPrice;
     }
 
-    public void setOrderTotalPrice(int orderTotalPrice) {
+    public void setOrderTotalPrice(BigDecimal orderTotalPrice) {
         this.orderTotalPrice = orderTotalPrice;
     }
 

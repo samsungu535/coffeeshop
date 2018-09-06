@@ -3,14 +3,16 @@ package com.trandofilidzi.coffeeshop.model.notentitymodel;
 import com.google.common.base.Objects;
 import com.trandofilidzi.coffeeshop.model.Coffee;
 
+import java.math.BigDecimal;
+
 public class SubOrder {
 
     private int subOrderId;
     private Coffee coffee;
     private int quantity;
-    private int subOrderTotalPrice;
+    private BigDecimal subOrderTotalPrice;
 
-    public SubOrder(int subOrderId, Coffee coffee, int quantity, int subOrderTotalPrice) {
+    public SubOrder(int subOrderId, Coffee coffee, int quantity, BigDecimal subOrderTotalPrice) {
         this.subOrderId = subOrderId;
         this.coffee = coffee;
         this.quantity = quantity;
@@ -25,11 +27,11 @@ public class SubOrder {
         this.subOrderId = subOrderId;
     }
 
-    public int getSubOrderTotalPrice() {
+    public BigDecimal getSubOrderTotalPrice() {
         return subOrderTotalPrice;
     }
 
-    public void setSubOrderTotalPrice(int subOrderTotalPrice) {
+    public void setSubOrderTotalPrice(BigDecimal subOrderTotalPrice) {
         this.subOrderTotalPrice = subOrderTotalPrice;
     }
 

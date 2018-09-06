@@ -4,11 +4,13 @@ import com.trandofilidzi.coffeeshop.properties.OrderProperties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 @Service
 public class OrderPropertiesImpl implements OrderProperties {
 
     @Value("${min.coffee.quantity}")
-    private int minCoffeeQuantity;
+    private BigDecimal minCoffeeQuantity;
 
     @Value("${one.hour}")
     private long oneHour;
@@ -23,7 +25,7 @@ public class OrderPropertiesImpl implements OrderProperties {
     private String pickupDelivery;
 
     @Value("${delivery.price}")
-    private int deliveryPrice;
+    private BigDecimal deliveryPrice;
 
     @Value("${time.order.processing}")
     private long timeToOrderProcessing;
@@ -34,7 +36,7 @@ public class OrderPropertiesImpl implements OrderProperties {
     }
 
     @Override
-    public int getMinCoffeeQuantity() {
+    public BigDecimal getMinCoffeeQuantity() {
         return minCoffeeQuantity;
     }
 
@@ -59,7 +61,7 @@ public class OrderPropertiesImpl implements OrderProperties {
     }
 
     @Override
-    public int getDeliveryPrice() {
+    public BigDecimal getDeliveryPrice() {
         return deliveryPrice;
     }
 }

@@ -8,6 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "t_coffee")
@@ -17,7 +18,7 @@ public class Coffee {
     private String coffeeName;
     private int coffeeArabica;
     private Order order;
-    private double coffeePricePerGram;
+    private BigDecimal coffeePricePerGram;
 
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
@@ -58,12 +59,12 @@ public class Coffee {
         this.coffeeArabica = coffeeArabica;
     }
 
-    public double getCoffeePricePerGram() {
+    public BigDecimal getCoffeePricePerGram() {
         return coffeePricePerGram;
     }
 
     @Column(name = "coffee_price_per_gram", nullable = false)
-    public void setCoffeePricePerGram(double coffeePricePerGram) {
+    public void setCoffeePricePerGram(BigDecimal coffeePricePerGram) {
         this.coffeePricePerGram = coffeePricePerGram;
     }
 

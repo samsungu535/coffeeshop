@@ -1,8 +1,10 @@
 package com.trandofilidzi.coffeeshop.properties;
 
+import java.math.BigDecimal;
+
 public interface OrderProperties {
 
-    int getMinCoffeeQuantity();
+    BigDecimal getMinCoffeeQuantity();
 
     long getOneHour();
 
@@ -12,7 +14,7 @@ public interface OrderProperties {
 
     String getPickupDelivery();
 
-    int getDeliveryPrice();
+    BigDecimal getDeliveryPrice();
 
     long getTimeToOrderProcessing();
 }

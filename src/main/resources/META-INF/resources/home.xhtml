@@ -18,7 +18,7 @@
         </p:confirmDialog>
         <p:layout style="min-width:400px;min-height:600px;">
             <p:layoutUnit position="west" resizable="true" size="200">
-                <p:commandButton action="#{orderBean.createNewOrder()}" value="Create new order"/>
+                <p:commandButton action="#{orderBean.createNewOrderRedirect()}" value="Create new order"/>
             </p:layoutUnit>
             <p:layoutUnit position="center">
                 <p:dataTable id="orderTable" var="order" value="#{orderBean.orderList}">

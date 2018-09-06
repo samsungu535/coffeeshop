@@ -1,5 +1,6 @@
 package com.trandofilidzi.coffeeshop.beans;
 
+import com.google.common.base.Preconditions;
 import com.trandofilidzi.coffeeshop.model.Coffee;
 import com.trandofilidzi.coffeeshop.model.Order;
 import com.trandofilidzi.coffeeshop.model.notentitymodel.SubOrder;
@@ -15,7 +16,7 @@ import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Named;
-import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -23,7 +24,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Named
-public class OrderBean implements Serializable {
+public class OrderBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderBean.class);
     private static AtomicInteger atomicInteger = new AtomicInteger(0);
@@ -37,7 +38,7 @@ public class OrderBean implements Serializable {
     private SubOrder subOrder;
     private List<SubOrder> subOrderList = new ArrayList<>();
     private Coffee coffee;
-    private int orderTotalPrice;
+    private BigDecimal orderTotalPrice = BigDecimal.ZERO;
     private String delivery;
     private Date dateFrom;
     private Date minDateFrom;
@@ -98,11 +99,11 @@ public class OrderBean implements Serializable {
         this.minDateTo = minDateTo;
     }
 
-    public int getOrderTotalPrice() {
+    public BigDecimal getOrderTotalPrice() {
         return orderTotalPrice;
     }
 
-    public void setOrderTotalPrice(int orderTotalPrice) {
+    public void setOrderTotalPrice(BigDecimal orderTotalPrice) {
         this.orderTotalPrice = orderTotalPrice;
     }
 
@@ -161,12 +162,13 @@ public class OrderBean implements Serializable {
 
     public void addToBucket() {
         if (MatcherUtil.quantityValidate(quantity)) {
-            int coffeeQuantity = Integer.parseInt(quantity);
-            if (coffeeQuantity >= orderProperties.getMinCoffeeQuantity()) {
-                int subOrderTotalPrice = new Double(coffeeQuantity * coffee.getCoffeePricePerGram()).intValue();
+            BigDecimal coffeeQuantity = BigDecimal.valueOf(Long.parseLong(quantity));
+            if (coffeeQuantity.compareTo(orderProperties.getMinCoffeeQuantity()) == 1 ||
+                    coffeeQuantity.compareTo(orderProperties.getMinCoffeeQuantity()) == 0) {
+                BigDecimal subOrderTotalPrice = coffee.getCoffeePricePerGram().multiply(coffeeQuantity);
                 SubOrder subOrder = new SubOrder(atomicInteger.incrementAndGet(), coffee, Integer.parseInt(quantity), subOrderTotalPrice);
                 subOrderList.add(subOrder);
-                orderTotalPrice = orderTotalPrice + subOrderTotalPrice;
+                orderTotalPrice = orderTotalPrice.add(subOrderTotalPrice);
                 clearFormAfterSuborderCreated();
                 LOGGER.info("SubOrder {} added to bucket", subOrder);
             } else {
@@ -182,9 +184,11 @@ public class OrderBean implements Serializable {
     }
 
     public void deleteFromBucket(String subOrderId) {
+        Preconditions.checkNotNull(subOrderId, "OrderBean.deleteFromBucket. subOrderId is null");
+
         if (subOrderList.size() == 1) {
             subOrderList.clear();
-            orderTotalPrice = 0;
+            orderTotalPrice = BigDecimal.ZERO;
             LOGGER.info("The bucket is empty");
             return;
         }
@@ -192,7 +196,7 @@ public class OrderBean implements Serializable {
         while (iterator.hasNext()) {
             SubOrder subOrder = iterator.next();
             if (subOrder.getSubOrderId() == Integer.parseInt(subOrderId)) {
-                orderTotalPrice = orderTotalPrice - subOrder.getSubOrderTotalPrice();
+                orderTotalPrice = orderTotalPrice.subtract(subOrder.getSubOrderTotalPrice());
                 iterator.remove();
                 LOGGER.info("SubOrder {} deleted from bucket", subOrder);
                 return;
@@ -202,10 +206,10 @@ public class OrderBean implements Serializable {
 
     public void onDeliveryChange() {
         if (delivery.equals(orderProperties.getByCourierDelivery())) {
-            orderTotalPrice = orderTotalPrice + orderProperties.getDeliveryPrice();
+            orderTotalPrice = orderTotalPrice.add(orderProperties.getDeliveryPrice());
             LOGGER.info("The total price is increased by the price of delivery: {}", orderProperties.getDeliveryPrice());
         } else if (delivery.equals(orderProperties.getPickupDelivery())) {
-            orderTotalPrice = orderTotalPrice - orderProperties.getDeliveryPrice();
+            orderTotalPrice = orderTotalPrice.subtract(orderProperties.getDeliveryPrice());
             LOGGER.info("The total price is reduced by the price of delivery: {}", orderProperties.getDeliveryPrice());
         }
     }
@@ -238,12 +242,14 @@ public class OrderBean implements Serializable {
         }
     }
 
-    public void deleteOrder(long orderId) {
-        orderService.deleteOrder(orderId);
+    public void deleteOrder(String orderId) {
+        Preconditions.checkNotNull(orderId, "OrderBean.deleteOrder. orderId is null");
+
+        orderService.deleteOrder(Long.parseLong(orderId));
         LOGGER.info("SubOrder with id: {} deleted" + orderId);
     }
 
-    public void createNewOrder() {
+    public void createNewOrderRedirect() {
         RedirectUtil.redirectEditCreateOrderPage();
     }
 
@@ -251,7 +257,7 @@ public class OrderBean implements Serializable {
         delivery = orderProperties.getPickupDelivery();
         dateFrom = null;
         dateTo = null;
-        orderTotalPrice = 0;
+        orderTotalPrice = BigDecimal.ZERO;
         quantity = null;
         subOrderList.clear();
         coffee = null;
