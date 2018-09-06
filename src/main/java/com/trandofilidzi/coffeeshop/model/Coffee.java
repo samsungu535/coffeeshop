@@ -5,8 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.math.BigDecimal;
 
@@ -17,17 +16,16 @@ public class Coffee {
     private long coffeeId;
     private String coffeeName;
     private int coffeeArabica;
-    private Order order;
     private BigDecimal coffeePricePerGram;
+    private SubOrder subOrder;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id", nullable = false)
-    public Order getOrder() {
-        return order;
+    @OneToOne(mappedBy = "coffee")
+    public SubOrder getSubOrder() {
+        return subOrder;
     }
 
-    public void setOrder(Order order) {
-        this.order = order;
+    public void setSubOrder(SubOrder subOrder) {
+        this.subOrder = subOrder;
     }
 
     @Id
@@ -70,6 +68,6 @@ public class Coffee {
 
     @Override
     public String toString() {
-        return coffeeName + ", arabica:" + coffeeArabica + "%, " + "price per gram: " + "$" + coffeePricePerGram;
+        return coffeeName + ", arabica:" + coffeeArabica + "%";
     }
 }

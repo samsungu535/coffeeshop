@@ -21,15 +21,15 @@ public class Order {
     private Date deliverDateFrom;
     private Date deliverDateTo;
     private BigDecimal orderTotalPrice;
-    private List<Coffee> coffeeList = new ArrayList<>();
+    private List<SubOrder> subOrderList = new ArrayList<>();
 
     @OneToMany(mappedBy = "order", orphanRemoval = true)
-    public List<Coffee> getCoffeeList() {
-        return coffeeList;
+    public List<SubOrder> getSubOrderList() {
+        return subOrderList;
     }
 
-    public void setCoffeeList(List<Coffee> coffeeList) {
-        this.coffeeList = coffeeList;
+    public void setSubOrderList(List<SubOrder> subOrderList) {
+        this.subOrderList = subOrderList;
     }
 
     @Id
@@ -77,17 +77,5 @@ public class Order {
 
     public void setOrderTotalPrice(BigDecimal orderTotalPrice) {
         this.orderTotalPrice = orderTotalPrice;
-    }
-
-    @Override
-    public String toString() {
-        return "Order{" +
-                "order_id=" + order_id +
-                ", isDeliver=" + isDeliver +
-                ", deliverDateFrom=" + deliverDateFrom +
-                ", deliverDateTo=" + deliverDateTo +
-                ", orderTotalPrice=" + orderTotalPrice +
-                ", coffeeList=" + coffeeList +
-                '}';
     }
 }

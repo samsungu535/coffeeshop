@@ -23,7 +23,7 @@
                             Select coffee
                         </f:facet>
                         <p:outputLabel value="Coffee:" for="coffee"/>
-                        <p:selectOneMenu id="coffee" value="#{orderBean.coffee}" converter="#{coffeeConverter}"
+                        <p:selectOneMenu id="coffee" value="#{subOrderBean.coffee}" converter="#{coffeeConverter}"
                                          filter="true"
                                          filterMatchMode="startsWith">
                             <f:selectItems value="#{coffeeBean.coffeeList}" var="coffee"
@@ -31,17 +31,17 @@
                                            itemValue="#{coffee}"/>
                         </p:selectOneMenu>
                         <p:outputLabel value="Quantity:" for="minimalQuantit"/>
-                        <p:inputText id="minimalQuantit" value="#{orderBean.quantity}"/>
+                        <p:inputText id="minimalQuantit" value="#{subOrderBean.quantity}"/>
                     </h:panelGrid>
 
                     <h:panelGrid columns="1" cellpadding="5">
                         <p:commandButton value="Add to bucket" update="bucket msgs"
                                          icon="ui-icon-check">
-                            <f:ajax execute="@form" render="@form" listener="#{orderBean.addToBucket()}"/>
+                            <f:ajax execute="@form" render="@form" listener="#{subOrderBean.addToBucket()}"/>
                         </p:commandButton>
                     </h:panelGrid>
 
-                    <h:panelGrid rendered="#{orderBean.subOrderList.size() > 0}" columns="2" cellpadding="5">
+                    <h:panelGrid rendered="#{subOrderBean.subOrderList.size() > 0}" columns="2" cellpadding="5">
                         <p:outputLabel for="delivery" value="Delivery:"/>
                         <p:selectOneRadio id="delivery" value="#{orderBean.delivery}">
                             <f:selectItem itemLabel="Pickup" itemValue="pickup"/>
@@ -63,8 +63,11 @@
                     </h:panelGrid>
 
                 </h:panelGrid>
-                <h:panelGrid columns="2" cellpadding="5">
+                <h:panelGrid rendered="#{orderBean.orderIdIsNull}" columns="1" cellpadding="5">
                     <p:commandButton update="msgs" value="Create order" action="#{orderBean.createOrder()}"/>
+                </h:panelGrid>
+                <h:panelGrid rendered="#{!orderBean.orderIdIsNull}" columns="1" cellpadding="5">
+                    <p:commandButton update="msgs" value="Update order" action="#{orderBean.updateOrder()}"/>
                 </h:panelGrid>
             </p:layoutUnit>
 
@@ -75,22 +78,22 @@
                         <f:facet name="header">
                             Bucket
                         </f:facet>
-                        <p:dataTable id="bucket" var="suborder" value="#{orderBean.subOrderList}">
+                        <p:dataTable id="bucket" var="suborder" value="#{subOrderBean.subOrderList}">
                             <p:column headerText="id">
-                                <h:outputText value="#{suborder.subOrderId}"/>
+                                <h:outputText value="#{suborder.internalSubOrderId}"/>
                             </p:column>
                             <p:column headerText="name">
                                 <h:outputText value="#{suborder.coffee}"/>
                             </p:column>
-                            <p:column headerText="quantity, gram">
-                                <h:outputText value="#{suborder.quantity}"/>
+                            <p:column headerText="subOrderCoffeeQuantity, gram">
+                                <h:outputText value="#{suborder.subOrderCoffeeQuantity}"/>
                             </p:column>
                             <p:column headerText="price, $">
                                 <h:outputText value="#{suborder.subOrderTotalPrice}"/>
                             </p:column>
                             <p:column headerText="delete from bucket">
                                 <p:commandButton value="delete" update="bucket"
-                                                 actionListener="#{orderBean.deleteFromBucket(suborder.subOrderId)}"/>
+                                                 actionListener="#{subOrderBean.deleteFromBucket(suborder.internalSubOrderId)}"/>
                             </p:column>
                             <p:columnGroup type="footer">
                                 <p:row>
