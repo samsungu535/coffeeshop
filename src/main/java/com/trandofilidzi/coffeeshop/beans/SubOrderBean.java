@@ -23,6 +23,7 @@ import java.util.List;
 public class SubOrderBean implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SubOrderBean.class);
+
     @Autowired
     private OrderProperties orderProperties;
 

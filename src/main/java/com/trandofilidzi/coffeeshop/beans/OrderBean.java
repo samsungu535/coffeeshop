@@ -27,16 +27,21 @@ import java.util.Map;
 public class OrderBean implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderBean.class);
+
     @Autowired
     private OrderService orderService;
+
     @Autowired
     private OrderProperties orderProperties;
+
     @Autowired
     private SubOrderService subOrderService;
-    private Order order;
-    private List<Order> orderList = new ArrayList<>();
+
     @Inject
     private SubOrderBean subOrderBean;
+
+    private Order order;
+    private List<Order> orderList = new ArrayList<>();
     private BigDecimal orderTotalPrice = BigDecimal.ZERO;
     private String delivery;
     private Date dateFrom;
