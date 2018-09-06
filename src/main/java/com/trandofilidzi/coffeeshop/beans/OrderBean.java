@@ -22,13 +22,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Named
 public class OrderBean implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderBean.class);
-    private AtomicInteger atomicInteger = new AtomicInteger(0);
     @Autowired
     private OrderService orderService;
     @Autowired
@@ -219,7 +217,7 @@ public class OrderBean implements Serializable {
         subOrderBean.setSubOrderList(subOrderList);
         for (SubOrder subOrder : subOrderList) {
             subOrder.setCoffeeToString(subOrder.getCoffee().toString());
-            subOrder.setInternalSubOrderId(atomicInteger.incrementAndGet());
+            subOrder.setInternalSubOrderId(subOrder.hashCode());
         }
         if (order.isDeliver()) {
             setDelivery(orderProperties.getByCourierDelivery());

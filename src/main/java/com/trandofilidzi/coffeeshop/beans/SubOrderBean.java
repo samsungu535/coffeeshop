@@ -18,13 +18,11 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Named
 public class SubOrderBean implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SubOrderBean.class);
-    private AtomicInteger atomicInteger = new AtomicInteger(0);
     @Autowired
     private OrderProperties orderProperties;
 
@@ -64,7 +62,8 @@ public class SubOrderBean implements Serializable {
             if (coffeeQuantity.compareTo(orderProperties.getMinCoffeeQuantity()) == 1 ||
                     coffeeQuantity.compareTo(orderProperties.getMinCoffeeQuantity()) == 0) {
                 BigDecimal subOrderTotalPrice = coffee.getCoffeePricePerGram().multiply(coffeeQuantity);
-                SubOrder subOrder = new SubOrder(atomicInteger.incrementAndGet(), coffee.toString(), coffee, Integer.parseInt(quantity), subOrderTotalPrice);
+                SubOrder subOrder = new SubOrder(coffee.toString(), coffee, Integer.parseInt(quantity), subOrderTotalPrice);
+                subOrder.setInternalSubOrderId(subOrder.hashCode());
                 orderBean.setOrderTotalPrice(orderBean.getOrderTotalPrice().add(subOrderTotalPrice));
                 subOrderList.add(subOrder);
                 clearFormAfterSuborderCreated();

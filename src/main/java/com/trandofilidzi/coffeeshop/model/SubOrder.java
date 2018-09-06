@@ -27,8 +27,7 @@ public class SubOrder {
     public SubOrder() {
     }
 
-    public SubOrder(long internalSubOrderId, String coffeeToString, Coffee coffee, int subOrderCoffeeQuantity, BigDecimal subOrderTotalPrice) {
-        this.internalSubOrderId = internalSubOrderId;
+    public SubOrder(String coffeeToString, Coffee coffee, int subOrderCoffeeQuantity, BigDecimal subOrderTotalPrice) {
         this.coffeeToString = coffeeToString;
         this.coffee = coffee;
         this.subOrderCoffeeQuantity = subOrderCoffeeQuantity;
