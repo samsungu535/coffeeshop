@@ -26,7 +26,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class OrderBean implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderBean.class);
-
     private static AtomicInteger atomicInteger = new AtomicInteger(0);
     @Autowired
     private OrderService orderService;
@@ -40,7 +39,6 @@ public class OrderBean implements Serializable {
     private Coffee coffee;
     private int orderTotalPrice;
     private String delivery;
-
     private Date dateFrom;
     private Date minDateFrom;
     private Date dateTo;
