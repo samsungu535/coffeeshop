@@ -23,7 +23,7 @@ public class CoffeeConverter implements Converter, Serializable {
             try {
                 return coffeeList.get(Integer.parseInt(value) - 1);
             } catch (NumberFormatException e) {
-                throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "Conversion Error", "Not a valid theme."));
+                throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "Conversion Error", "Not a valid item."));
             }
         } else {
             return null;
@@ -39,6 +39,4 @@ public class CoffeeConverter implements Converter, Serializable {
             return null;
         }
     }
-
-
 }

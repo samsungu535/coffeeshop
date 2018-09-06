@@ -14,16 +14,6 @@ public class OrderBeanTest extends CoffeeShopApplicationTests {
     }
 
     @Test(expected = NullPointerException.class)
-    public void test_deleteFromBucketWhenSubOrderIdIsNull() {
-        orderBean.deleteFromBucket(null);
-    }
-
-    @Test
-    public void test_deleteFromBucketSuccess() {
-        orderBean.deleteFromBucket("1");
-    }
-
-    @Test(expected = NullPointerException.class)
     public void test_deleteOrderWhenOrderIdInNull() {
         orderBean.deleteOrder(null);
     }

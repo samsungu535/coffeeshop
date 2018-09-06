@@ -13,8 +13,8 @@
     <h:form order_id="form">
 
         <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
-            <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
-            <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+            <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"/>
+            <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close"/>
         </p:confirmDialog>
         <p:layout style="min-width:400px;min-height:600px;">
             <p:layoutUnit position="west" resizable="true" size="200">
@@ -24,6 +24,11 @@
                 <p:dataTable id="orderTable" var="order" value="#{orderBean.orderList}">
                     <p:column headerText="order_id">
                         <h:outputText value="#{order.orderId}"/>
+                    </p:column>
+                    <p:column headerText="Sub order">
+                        <p:dataList value="#{order.subOrderList}" var="subOrder" type="ordered">
+                            #{subOrder.toString()}
+                        </p:dataList>
                     </p:column>
                     <p:column headerText="Total price">
                         <h:outputText value="#{order.orderTotalPrice}"/>
@@ -38,11 +43,15 @@
                         <h:outputText value="#{order.deliverDateTo}"/>
                     </p:column>
                     <p:column headerText="Edit order">
-                        <p:commandButton  value="Edit order" />
+                        <p:commandButton action="#{orderBean.editOrder}" value="Edit order">
+
+                        </p:commandButton>
                     </p:column>
                     <p:column headerText="Delete order">
-                        <p:commandButton update="orderTable" value="Delete order" actionListener="#{orderBean.deleteOrder(order.orderId)}">
-                            <p:confirm header="Confirmation" message="Order wil be deteted. Are you sure?" icon="ui-icon-alert" />
+                        <p:commandButton update="orderTable" value="Delete order"
+                                         actionListener="#{orderBean.deleteOrder(order.orderId)}">
+                            <p:confirm header="Confirmation" message="Order wil be deteted. Are you sure?"
+                                       icon="ui-icon-alert"/>
                         </p:commandButton>
                     </p:column>
                 </p:dataTable>

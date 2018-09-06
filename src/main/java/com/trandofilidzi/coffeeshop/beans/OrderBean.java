@@ -1,12 +1,11 @@
 package com.trandofilidzi.coffeeshop.beans;
 
 import com.google.common.base.Preconditions;
-import com.trandofilidzi.coffeeshop.model.Coffee;
 import com.trandofilidzi.coffeeshop.model.Order;
-import com.trandofilidzi.coffeeshop.model.notentitymodel.SubOrder;
+import com.trandofilidzi.coffeeshop.model.SubOrder;
 import com.trandofilidzi.coffeeshop.properties.OrderProperties;
 import com.trandofilidzi.coffeeshop.service.OrderService;
-import com.trandofilidzi.coffeeshop.utils.MatcherUtil;
+import com.trandofilidzi.coffeeshop.service.SubOrderService;
 import com.trandofilidzi.coffeeshop.utils.RedirectUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,29 +14,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
+import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Map;
 
 @Named
-public class OrderBean {
+public class OrderBean implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderBean.class);
-    private static AtomicInteger atomicInteger = new AtomicInteger(0);
     @Autowired
     private OrderService orderService;
     @Autowired
     private OrderProperties orderProperties;
+    @Autowired
+    private SubOrderService subOrderService;
     private Order order;
     private List<Order> orderList = new ArrayList<>();
-    private String quantity;
-    private SubOrder subOrder;
-    private List<SubOrder> subOrderList = new ArrayList<>();
-    private Coffee coffee;
+    @Inject
+    private SubOrderBean subOrderBean;
     private BigDecimal orderTotalPrice = BigDecimal.ZERO;
     private String delivery;
     private Date dateFrom;
@@ -128,82 +127,6 @@ public class OrderBean {
         maxDateTo = new Date(minDateTo.getTime() + orderProperties.getOneHour() * orderProperties.getTimeToDelivery());
     }
 
-    public SubOrder getSubOrder() {
-        return subOrder;
-    }
-
-    public void setSubOrder(SubOrder subOrder) {
-        this.subOrder = subOrder;
-    }
-
-    public List<SubOrder> getSubOrderList() {
-        return subOrderList;
-    }
-
-    public void setSubOrderList(List<SubOrder> subOrderList) {
-        this.subOrderList = subOrderList;
-    }
-
-    public Coffee getCoffee() {
-        return coffee;
-    }
-
-    public void setCoffee(Coffee coffee) {
-        this.coffee = coffee;
-    }
-
-    public String getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(String quantity) {
-        this.quantity = quantity;
-    }
-
-    public void addToBucket() {
-        if (MatcherUtil.quantityValidate(quantity)) {
-            BigDecimal coffeeQuantity = BigDecimal.valueOf(Long.parseLong(quantity));
-            if (coffeeQuantity.compareTo(orderProperties.getMinCoffeeQuantity()) == 1 ||
-                    coffeeQuantity.compareTo(orderProperties.getMinCoffeeQuantity()) == 0) {
-                BigDecimal subOrderTotalPrice = coffee.getCoffeePricePerGram().multiply(coffeeQuantity);
-                SubOrder subOrder = new SubOrder(atomicInteger.incrementAndGet(), coffee, Integer.parseInt(quantity), subOrderTotalPrice);
-                subOrderList.add(subOrder);
-                orderTotalPrice = orderTotalPrice.add(subOrderTotalPrice);
-                clearFormAfterSuborderCreated();
-                LOGGER.info("SubOrder {} added to bucket", subOrder);
-            } else {
-                LOGGER.info("The quantity is very small, quantity = {}", quantity);
-                FacesContext facesContext = FacesContext.getCurrentInstance();
-                facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, "The quantity is very small", "Minimal quantity is" + orderProperties.getMinCoffeeQuantity()));
-            }
-        } else {
-            LOGGER.info("Invalid format of quantity");
-            FacesContext facesContext = FacesContext.getCurrentInstance();
-            facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, "Invalid format of quantity", "Enter the number"));
-        }
-    }
-
-    public void deleteFromBucket(String subOrderId) {
-        Preconditions.checkNotNull(subOrderId, "OrderBean.deleteFromBucket. subOrderId is null");
-
-        if (subOrderList.size() == 1) {
-            subOrderList.clear();
-            orderTotalPrice = BigDecimal.ZERO;
-            LOGGER.info("The bucket is empty");
-            return;
-        }
-        Iterator<SubOrder> iterator = subOrderList.iterator();
-        while (iterator.hasNext()) {
-            SubOrder subOrder = iterator.next();
-            if (subOrder.getSubOrderId() == Integer.parseInt(subOrderId)) {
-                orderTotalPrice = orderTotalPrice.subtract(subOrder.getSubOrderTotalPrice());
-                iterator.remove();
-                LOGGER.info("SubOrder {} deleted from bucket", subOrder);
-                return;
-            }
-        }
-    }
-
     public void onDeliveryChange() {
         if (delivery.equals(orderProperties.getByCourierDelivery())) {
             orderTotalPrice = orderTotalPrice.add(orderProperties.getDeliveryPrice());
@@ -215,6 +138,7 @@ public class OrderBean {
     }
 
     public void createOrder() {
+        List<SubOrder> subOrderList = subOrderBean.getSubOrderList();
         if (!subOrderList.isEmpty()) {
             Order order = new Order();
             if (delivery.equals(orderProperties.getByCourierDelivery())) {
@@ -224,13 +148,13 @@ public class OrderBean {
             } else if (delivery.equals(orderProperties.getPickupDelivery())) {
                 order.setDeliver(false);
             }
-            List<Coffee> coffeeList = new ArrayList<>();
-            for (SubOrder subOrder : subOrderList) {
-                coffeeList.add(subOrder.getCoffee());
-            }
-            order.setCoffeeList(coffeeList);
+            order.setSubOrderList(subOrderBean.getSubOrderList());
             order.setOrderTotalPrice(orderTotalPrice);
-            orderService.createOrder(order);
+            Order savedOrder = orderService.createOrder(order);
+            for (SubOrder subOrder: subOrderList){
+                subOrder.setOrder(savedOrder);
+            }
+            subOrderService.saveAllSubOrders(subOrderList);
             clearFormAfterOrderCreated();
             RedirectUtil.redirectToHomePage();
             LOGGER.info("Order created");
@@ -240,6 +164,19 @@ public class OrderBean {
             FacesContext facesContext = FacesContext.getCurrentInstance();
             facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, "Bucket is empty", "Please choose any more coffee"));
         }
+    }
+
+    public void editOrder() {
+        FacesContext fc = FacesContext.getCurrentInstance();
+        Map<String, String> params = fc.getExternalContext().getRequestParameterMap();
+        for (Order ord : orderList) {
+            if (ord.getOrderId() == Long.parseLong(params.get("orderId"))) {
+                order = ord;
+            }
+        }
+//        List<Coffee> coffeeList = order.getCoffeeList();
+//        for (Coffee coffe: coffeeList){
+//            subOrderList.add(new SubOrder(atomicInteger.incrementAndGet(), coffee, Integer.parseInt(quantity), subOrderTotalPrice));
     }
 
     public void deleteOrder(String orderId) {
@@ -258,14 +195,7 @@ public class OrderBean {
         dateFrom = null;
         dateTo = null;
         orderTotalPrice = BigDecimal.ZERO;
-        quantity = null;
-        subOrderList.clear();
-        coffee = null;
+        subOrderBean.getSubOrderList().clear();
         LOGGER.info("Creating order form refreshed");
-    }
-
-    public void clearFormAfterSuborderCreated() {
-        quantity = null;
-        LOGGER.info("Quantity field refreshed");
     }
 }
