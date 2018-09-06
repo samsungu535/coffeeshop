@@ -1,12 +1,7 @@
 package com.trandofilidzi.coffeeshop.repository;
 
 import com.trandofilidzi.coffeeshop.model.Coffee;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-
-public interface CoffeeRepository {
-
-    Coffee getCoffeeById(Long id);
-
-    List<Coffee> listCoffee();
+public interface CoffeeRepository extends JpaRepository<Coffee, Long> {
 }

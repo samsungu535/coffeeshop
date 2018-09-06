@@ -20,17 +20,15 @@ public class CoffeeServiceImpl implements CoffeeService {
     private CoffeeRepository coffeeRepository;
 
     @Override
-    @Transactional
-    public Coffee getCoffeeById(Long id) {
-        Coffee coffee = coffeeRepository.getCoffeeById(id);
+    public Coffee getCoffeeById(long id) {
+        Coffee coffee = coffeeRepository.getOne(id);
         LOGGER.debug("Coffee with id = {} has found", id);
         return coffee;
     }
 
     @Override
-    @Transactional
     public List<Coffee> listCoffee() {
-        List<Coffee> coffeeList = coffeeRepository.listCoffee();
+        List<Coffee> coffeeList = coffeeRepository.findAll();
         LOGGER.debug("All coffee has found. Total list size = {}", coffeeList.size());
         return coffeeList;
     }
