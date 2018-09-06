@@ -5,12 +5,15 @@ import com.trandofilidzi.coffeeshop.model.Order;
 import com.trandofilidzi.coffeeshop.model.notentitymodel.SubOrder;
 import com.trandofilidzi.coffeeshop.properties.OrderProperties;
 import com.trandofilidzi.coffeeshop.service.OrderService;
+import com.trandofilidzi.coffeeshop.utils.MatcherUtil;
 import com.trandofilidzi.coffeeshop.utils.RedirectUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
 import javax.inject.Named;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -42,6 +45,7 @@ public class OrderBean implements Serializable {
     private Date minDateFrom;
     private Date dateTo;
     private Date maxDateTo;
+    private Date minDateTo;
 
     @PostConstruct
     public void init() {
@@ -88,6 +92,14 @@ public class OrderBean implements Serializable {
         this.maxDateTo = maxDateTo;
     }
 
+    public Date getMinDateTo() {
+        return minDateTo;
+    }
+
+    public void setMinDateTo(Date minDateTo) {
+        this.minDateTo = minDateTo;
+    }
+
     public int getOrderTotalPrice() {
         return orderTotalPrice;
     }
@@ -113,7 +125,8 @@ public class OrderBean implements Serializable {
     }
 
     public void onDateSelect() {
-        maxDateTo = new Date(dateFrom.getTime() + orderProperties.getOneHour() * orderProperties.getTimeToDelivery());
+        minDateTo = new Date(dateFrom.getTime() + orderProperties.getOneHour() * orderProperties.getTimeToOrderProcessing());
+        maxDateTo = new Date(minDateTo.getTime() + orderProperties.getOneHour() * orderProperties.getTimeToDelivery());
     }
 
     public SubOrder getSubOrder() {
@@ -149,12 +162,25 @@ public class OrderBean implements Serializable {
     }
 
     public void addToBucket() {
-        int coffeeQuantity = Integer.parseInt(quantity);
-        int subOrderTotalPrice = new Double(coffeeQuantity * coffee.getCoffeePricePerGram()).intValue();
-        SubOrder subOrder = new SubOrder(atomicInteger.incrementAndGet(), coffee, Integer.parseInt(quantity), subOrderTotalPrice);
-        subOrderList.add(subOrder);
-        orderTotalPrice = orderTotalPrice + subOrderTotalPrice;
-        LOGGER.info("SubOrder {} added to bucket", subOrder);
+        if (MatcherUtil.quantityValidate(quantity)) {
+            int coffeeQuantity = Integer.parseInt(quantity);
+            if (coffeeQuantity >= orderProperties.getMinCoffeeQuantity()) {
+                int subOrderTotalPrice = new Double(coffeeQuantity * coffee.getCoffeePricePerGram()).intValue();
+                SubOrder subOrder = new SubOrder(atomicInteger.incrementAndGet(), coffee, Integer.parseInt(quantity), subOrderTotalPrice);
+                subOrderList.add(subOrder);
+                orderTotalPrice = orderTotalPrice + subOrderTotalPrice;
+                clearFormAfterSuborderCreated();
+                LOGGER.info("SubOrder {} added to bucket", subOrder);
+            } else {
+                LOGGER.info("The quantity is very small, quantity = {}", quantity);
+                FacesContext facesContext = FacesContext.getCurrentInstance();
+                facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, "The quantity is very small", "Minimal quantity is" + orderProperties.getMinCoffeeQuantity()));
+            }
+        } else {
+            LOGGER.info("Invalid format of quantity");
+            FacesContext facesContext = FacesContext.getCurrentInstance();
+            facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, "Invalid format of quantity", "Enter the number"));
+        }
     }
 
     public void deleteFromBucket(String subOrderId) {
@@ -203,11 +229,15 @@ public class OrderBean implements Serializable {
             order.setCoffeeList(coffeeList);
             order.setOrderTotalPrice(orderTotalPrice);
             orderService.createOrder(order);
+            clearFormAfterOrderCreated();
             RedirectUtil.redirectToHomePage();
             LOGGER.info("Order created");
             return;
+        } else {
+            LOGGER.info("SubOrder list is empty");
+            FacesContext facesContext = FacesContext.getCurrentInstance();
+            facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, "Bucket is empty", "Please choose any more coffee"));
         }
-        LOGGER.info("SubOrder list is empty");
     }
 
     public void deleteOrder(long orderId) {
@@ -217,5 +247,21 @@ public class OrderBean implements Serializable {
 
     public void createNewOrder() {
         RedirectUtil.redirectEditCreateOrderPage();
+    }
+
+    public void clearFormAfterOrderCreated() {
+        delivery = orderProperties.getPickupDelivery();
+        dateFrom = null;
+        dateTo = null;
+        orderTotalPrice = 0;
+        quantity = null;
+        subOrderList.clear();
+        coffee = null;
+        LOGGER.info("Creating order form refreshed");
+    }
+
+    public void clearFormAfterSuborderCreated() {
+        quantity = null;
+        LOGGER.info("Quantity field refreshed");
     }
 }

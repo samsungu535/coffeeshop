@@ -12,7 +12,6 @@
 <h:body>
     <h:form order_id="form">
 
-
         <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
             <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
             <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
@@ -41,9 +40,12 @@
                     <p:column headerText="Deliver date, to">
                         <h:outputText value="#{order.deliverDateTo}"/>
                     </p:column>
-                    <p:column headerText="Delete Order">
+                    <p:column headerText="Edit order">
+                        <p:commandButton  value="Edit order" />
+                    </p:column>
+                    <p:column headerText="Delete order">
                         <p:commandButton update="orderTable" value="Delete order" actionListener="#{orderBean.deleteOrder(order.orderId)}">
-                            <p:confirm header="Confirmation" message="Are you sure?" icon="ui-icon-alert" />
+                            <p:confirm header="Confirmation" message="Order wil be deteted. Are you sure?" icon="ui-icon-alert" />
                         </p:commandButton>
                     </p:column>
                 </p:dataTable>

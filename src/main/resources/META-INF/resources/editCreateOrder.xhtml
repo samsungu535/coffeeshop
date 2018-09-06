@@ -12,70 +12,97 @@
 
 <h:body>
     <h:form>
-        <h:panelGrid columns="6" cellpadding="5">
-            <p:outputLabel value="Coffee:" for="coffee"/>
-            <p:selectOneMenu id="coffee" value="#{orderBean.coffee}" converter="#{coffeeConverter}" filter="true"
-                             filterMatchMode="startsWith">
-                <f:selectItems value="#{coffeeBean.coffeeList}" var="coffee" itemLabel="#{coffee.toString()}"
-                               itemValue="#{coffee}"/>
-            </p:selectOneMenu>
-            <p:inputText id="minimalQuantit" value="#{orderBean.quantity}">
-                <f:validateRegex pattern="[0-9]*"/>
-                <f:validateLongRange minimum="100" maximum="10000" />
-            </p:inputText>
-            <p:commandButton value="add" update="total" actionListener="#{orderBean.addToBucket()}"
-                             icon="ui-icon-check"/>
-            <h:panelGrid id="total" columns="1" cellpadding="5">
-                <f:facet name="header">
-                    Bucket
-                </f:facet>
-                <p:dataTable id="totalTable" var="suborder" value="#{orderBean.subOrderList}">
-                    <p:column headerText="id">
-                        <h:outputText value="#{suborder.subOrderId}"/>
-                    </p:column>
-                    <p:column headerText="Name">
-                        <h:outputText value="#{suborder.coffee}"/>
-                    </p:column>
-                    <p:column headerText="quantity, gram">
-                        <h:outputText value="#{suborder.quantity}"/>
-                    </p:column>
-                    <p:column headerText="price, $">
-                        <h:outputText value="#{suborder.subOrderTotalPrice}"/>
-                    </p:column>
-                    <p:column headerText="delete from bucket">
-                        <p:commandButton value="delete" update="totalTable"
-                                         actionListener="#{orderBean.deleteFromBucket(suborder.subOrderId)}"/>
-                    </p:column>
-                    <p:columnGroup type="footer">
-                        <p:row>
-                            <p:column style="text-align:right" footerText="Total price:"/>
-                            <p:column colspan="1" footerText="$#{orderBean.orderTotalPrice}"/>
-                        </p:row>
-                    </p:columnGroup>
-                </p:dataTable>
-            </h:panelGrid>
-        </h:panelGrid>
-        <h:panelGrid columns="3" cellpadding="5">
-            <p:outputLabel for="delivery" value="Delivery:"/>
-            <p:selectOneRadio id="delivery" value="#{orderBean.delivery}">
-                <f:selectItem itemLabel="Pickup" itemValue="pickup"/>
-                <f:selectItem itemLabel="By courier" itemValue="byCourier"/>
-                <f:ajax execute="@form" render="@form" listener="#{orderBean.onDeliveryChange()}"/>
-            </p:selectOneRadio>
-        </h:panelGrid>
-        <h:panelGrid id="chooseDate" rendered="#{orderBean.delivery eq 'byCourier'}" columns="4" cellpadding="5">
-            <p:outputLabel for="restrictedFrom" value="from:"/>
-            <p:calendar id="restrictedFrom" value="#{orderBean.dateFrom}" mindate="#{orderBean.minDateFrom}"
-                        pattern="MM/dd/yyyy HH:mm">
-                <p:ajax listener="#{orderBean.onDateSelect()}" update="restricted"/>
-            </p:calendar>
-            <p:outputLabel for="restricted" value="to:"/>
-            <p:calendar id="restricted" value="#{orderBean.dateTo}" mindate="#{orderBean.dateFrom}"
-                        maxdate="#{orderBean.maxDateTo}" pattern="MM/dd/yyyy HH:mm"/>
-        </h:panelGrid>
-        <h:panelGrid columns="2" cellpadding="5">
-            <p:commandButton value="Create order" action="#{orderBean.createOrder()}"/>
-        </h:panelGrid>
+        <p:growl id="msgs" showDetail="true"/>
+
+        <p:layout style="min-width:400px;min-height:600px;">
+            <p:layoutUnit position="west" size="550">
+
+                <h:panelGrid id="inputBlock" columns="1" cellpadding="5">
+                    <h:panelGrid columns="2" cellpadding="5">
+                        <f:facet name="header">
+                            Select coffee
+                        </f:facet>
+                        <p:outputLabel value="Coffee:" for="coffee"/>
+                        <p:selectOneMenu id="coffee" value="#{orderBean.coffee}" converter="#{coffeeConverter}"
+                                         filter="true"
+                                         filterMatchMode="startsWith">
+                            <f:selectItems value="#{coffeeBean.coffeeList}" var="coffee"
+                                           itemLabel="#{coffee.toString()}"
+                                           itemValue="#{coffee}"/>
+                        </p:selectOneMenu>
+                        <p:outputLabel value="Quantity:" for="minimalQuantit"/>
+                        <p:inputText id="minimalQuantit" value="#{orderBean.quantity}"/>
+                    </h:panelGrid>
+
+                    <h:panelGrid columns="1" cellpadding="5">
+                        <p:commandButton value="Add to bucket" update="bucket msgs"
+                                         icon="ui-icon-check">
+                            <f:ajax execute="@form" render="@form" listener="#{orderBean.addToBucket()}"/>
+                        </p:commandButton>
+                    </h:panelGrid>
+
+                    <h:panelGrid rendered="#{orderBean.subOrderList.size() > 0}" columns="2" cellpadding="5">
+                        <p:outputLabel for="delivery" value="Delivery:"/>
+                        <p:selectOneRadio id="delivery" value="#{orderBean.delivery}">
+                            <f:selectItem itemLabel="Pickup" itemValue="pickup"/>
+                            <f:selectItem itemLabel="By courier" itemValue="byCourier"/>
+                            <f:ajax execute="@form" render="@form" listener="#{orderBean.onDeliveryChange()}"/>
+                        </p:selectOneRadio>
+                    </h:panelGrid>
+
+                    <h:panelGrid id="chooseDate" rendered="#{orderBean.delivery eq 'byCourier'}" columns="2"
+                                 cellpadding="5">
+                        <p:outputLabel for="restrictedFrom" value="from:"/>
+                        <p:calendar id="restrictedFrom" value="#{orderBean.dateFrom}" mindate="#{orderBean.minDateFrom}"
+                                    pattern="MM/dd/yyyy HH:mm">
+                            <p:ajax listener="#{orderBean.onDateSelect()}" update="restricted"/>
+                        </p:calendar>
+                        <p:outputLabel for="restricted" value="to:"/>
+                        <p:calendar id="restricted" value="#{orderBean.dateTo}" mindate="#{orderBean.minDateTo}"
+                                    maxdate="#{orderBean.maxDateTo}" pattern="MM/dd/yyyy HH:mm"/>
+                    </h:panelGrid>
+
+                </h:panelGrid>
+                <h:panelGrid columns="2" cellpadding="5">
+                    <p:commandButton update="msgs" value="Create order" action="#{orderBean.createOrder()}"/>
+                </h:panelGrid>
+            </p:layoutUnit>
+
+            <p:layoutUnit position="center">
+                <h:panelGrid columns="1" cellpadding="5">
+
+                    <h:panelGrid columns="1" cellpadding="5">
+                        <f:facet name="header">
+                            Bucket
+                        </f:facet>
+                        <p:dataTable id="bucket" var="suborder" value="#{orderBean.subOrderList}">
+                            <p:column headerText="id">
+                                <h:outputText value="#{suborder.subOrderId}"/>
+                            </p:column>
+                            <p:column headerText="name">
+                                <h:outputText value="#{suborder.coffee}"/>
+                            </p:column>
+                            <p:column headerText="quantity, gram">
+                                <h:outputText value="#{suborder.quantity}"/>
+                            </p:column>
+                            <p:column headerText="price, $">
+                                <h:outputText value="#{suborder.subOrderTotalPrice}"/>
+                            </p:column>
+                            <p:column headerText="delete from bucket">
+                                <p:commandButton value="delete" update="bucket"
+                                                 actionListener="#{orderBean.deleteFromBucket(suborder.subOrderId)}"/>
+                            </p:column>
+                            <p:columnGroup type="footer">
+                                <p:row>
+                                    <p:column style="text-align:right" footerText="Total price:"/>
+                                    <p:column colspan="1" footerText="$#{orderBean.orderTotalPrice}"/>
+                                </p:row>
+                            </p:columnGroup>
+                        </p:dataTable>
+                    </h:panelGrid>
+                </h:panelGrid>
+            </p:layoutUnit>
+        </p:layout>
     </h:form>
 </h:body>
 </html>

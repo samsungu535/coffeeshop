@@ -25,6 +25,14 @@ public class OrderPropertiesImpl implements OrderProperties {
     @Value("${delivery.price}")
     private int deliveryPrice;
 
+    @Value("${time.order.processing}")
+    private long timeToOrderProcessing;
+
+    @Override
+    public long getTimeToOrderProcessing() {
+        return timeToOrderProcessing;
+    }
+
     @Override
     public int getMinCoffeeQuantity() {
         return minCoffeeQuantity;
